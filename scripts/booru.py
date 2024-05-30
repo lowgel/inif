@@ -27,7 +27,6 @@ driver = webdriver.Firefox(options=firefox_options)
 driver.install_addon(os.getcwd() + "/../extensions/ublock_origin-1.58.0.xpi", temporary=True)
 driver.get(site)
 
-quit()
 driver.find_element(By.CSS_SELECTOR, "input").send_keys(sys.argv[2] + Keys.ENTER)
 wait = WebDriverWait(driver, 10)
 
@@ -49,7 +48,7 @@ while(True):
         driver.switch_to.window(handles[1])
         full_res_img = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "img[id='image']")))
         src = full_res_img.get_attribute("src")
-        print(subprocess.check_output(["curl", "-s", "-o", "-w", "%{filename_effective}", src]))
+        print(subprocess.check_output(["curl", "-JLO", src]))
         driver.close()
         driver.switch_to.window(handles[0])
         
