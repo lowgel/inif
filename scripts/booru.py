@@ -10,9 +10,10 @@ from selenium.webdriver.support import expected_conditions as EC
 import sqlite3
 
 import time
-import subprocess 
 import sys
 import os
+
+currdir = os.path.dirname(os.path.realpath(__file__))
 
 if len(sys.argv) != 3:
     print("ERROR: incorrect arguments\nusage: python3 scraper.py https://example.booru.com your_search_term")
@@ -35,7 +36,7 @@ wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[id='content']")
 imgdb= sqlite3.connect("../img.db")
 cursor = imgdb.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS imgs(id INTEGER PRIMARY KEY, filename TEXT, link TEXT, tags TEXT, rating TEXT);")
+cursor.execute("CREATE TABLE IF NOT EXISTS imgs(id INTEGER PRIMARY KEY, filename TEXT, link TEXT, tags TEXT, favorite TEXT);")
 
 imgs = [] 
 
@@ -48,7 +49,10 @@ while(True):
         driver.switch_to.window(handles[1])
         full_res_img = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "img[id='image']")))
         src = full_res_img.get_attribute("src")
-        print(subprocess.check_output(["curl", "-JLO", src]))
+        filename = src.split('/')[-1]
+        os.system("curl -o " + currdir + "/../images/" + filename + " "  + src)
+        print(filename)
+        
         driver.close()
         driver.switch_to.window(handles[0])
         
