@@ -33,10 +33,10 @@ wait = WebDriverWait(driver, 10)
 
 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[id='content']")))
 
-imgdb= sqlite3.connect("../img.db")
+imgdb= sqlite3.connect(currdir + "/../img.db")
 cursor = imgdb.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS imgs(id INTEGER PRIMARY KEY, filename TEXT, link TEXT, tags TEXT, favorite TEXT);")
+cursor.execute("CREATE TABLE IF NOT EXISTS imgs(id INTEGER PRIMARY KEY, filename TEXT, link TEXT, tags TEXT, favorite TEXT, custom TEXT);")
 
 imgs = [] 
 
@@ -47,11 +47,13 @@ while(True):
         webdriver.ActionChains(driver).key_down(Keys.CONTROL).click(img).key_up(Keys.CONTROL).perform()
         handles = driver.window_handles
         driver.switch_to.window(handles[1])
+
         full_res_img = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "img[id='image']")))
         src = full_res_img.get_attribute("src")
         filename = src.split('/')[-1]
         os.system("curl -o " + currdir + "/../images/" + filename + " "  + src)
         print(filename)
+        cursor.execute("INSERT INTO imgs(filename, link, tags, favorite) VALUES (?, ?, ?, ?)", (filename, driver.current_url, tags, "FALSE"))
         
         driver.close()
         driver.switch_to.window(handles[0])
@@ -65,5 +67,6 @@ while(True):
 
 
 imgdb.commit()
+imgdb.close()
 driver.quit()
 
